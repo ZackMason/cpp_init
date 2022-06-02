@@ -8,6 +8,7 @@ code_template_keywords = [
     'CLASS_NAME',
     'HEADER_PATH',
     'SOURCE_PATH',
+    'DATE',
 ]
 
 CPP_CLASS_TEMPLATE = '''#include "%HEADER_PATH%"
@@ -195,7 +196,8 @@ def create_cpp_class(class_name):
         contents = config[name].replace('%CLASS_NAME%', class_name)
         contents = contents.replace('%HEADER_PATH%', f'{class_sub_dir}{class_name}.hpp')
         contents = contents.replace('%DATE%', str(todays_date))
-        return f'{preamb}\n{contents}'
+        sep = '\n' if preamb else ''
+        return f'{preamb}{sep}{contents}'
     
     preamble = create_template('preamble')
 
