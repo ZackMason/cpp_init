@@ -1,18 +1,30 @@
 import os, argparse
 
+import yaml
 
-CPP_CLASS_TEMPLATE = '''#include "%s"
+
+code_template_keywords = [
+    'CLASS_NAME',
+    'HEADER_PATH',
+    'SOURCE_PATH',
+]
+
+CPP_CLASS_TEMPLATE = '''#include "%HEADER_PATH%"
 
 
 '''
 
 HPP_CLASS_TEMPLATE = '''#pragma once
 
-struct %s_t {
+struct %CLASS_NAME%_t {
 
 };
 '''
 
+config = {
+    'hpp_template': HPP_CLASS_TEMPLATE,
+    'cpp_template': CPP_CLASS_TEMPLATE,
+}
 
 CONAN_TEMPLATE = '''
 [requires]
@@ -166,7 +178,7 @@ def create_cpp_class(class_name):
 
     class_sub_dir = class_name.split('/')
     class_name = class_sub_dir[-1]
-    class_sub_dir = '/'.join(class_sub_dir[:-1])
+    class_sub_dir = '/'.join(class_sub_dir[:-1]) + ('/' if class_sub_dir[:-1] else '')
 
     class_include = f'{project_directory_path}/include/{class_sub_dir}'
     class_source = f'{project_directory_path}/src/{class_sub_dir}'
@@ -177,12 +189,41 @@ def create_cpp_class(class_name):
 
     try:
         with open(f'{class_include}/{class_name}.hpp', 'x') as f:
-            f.write(HPP_CLASS_TEMPLATE % class_name)
+            hpp_contents = config['hpp_template'].replace('%CLASS_NAME%', class_name)
+            hpp_contents = hpp_contents.replace('%HEADER_PATH%', f'{class_sub_dir}{class_name}.hpp')
+            f.write(hpp_contents)
         with open(f'{class_source}/{class_name}.cpp', 'x') as f:
-            f.write(CPP_CLASS_TEMPLATE % (f'{class_sub_dir}/{class_name}.hpp'))
+            cpp_contents = config['cpp_template'].replace('%CLASS_NAME%', class_name)
+            cpp_contents = cpp_contents.replace('%HEADER_PATH%', f'{class_sub_dir}{class_name}.hpp')
+            f.write(cpp_contents)
         print(f'Created Class: {class_name} at {project_directory_path}')
-    except:
-        print(f'Failed to create class: {class_name}')
+    except Exception as e:
+        print(f'Failed to create class: {class_name} ', e)
+
+def init_data_dir():
+    home_dir = os.path.expanduser('~/.cpp_init')
+    if os.path.isdir(home_dir): return
+    os.mkdir(home_dir)
+    os.mkdir(f'{home_dir}/templates')
+    with open(f'{home_dir}/config.yaml', 'x') as f:
+        f.write('''hpp_template: default
+cpp_template: default''')
+
+def read_config():
+    global config
+    home_dir = os.path.expanduser('~/.cpp_init')
+    assert os.path.isdir(home_dir)
+    with open(f'{home_dir}/config.yaml', 'r') as f:
+        yaml_config = yaml.load(f, Loader=yaml.FullLoader)
+        if yaml_config['hpp_template'] != 'default':
+            template_file = yaml_config['hpp_template']
+            with open(f'{home_dir}/templates/{template_file}') as tf:
+                config['hpp_template'] = tf.read()
+        if yaml_config['cpp_template'] != 'default':
+            template_file = yaml_config['cpp_template']
+            with open(f'{home_dir}/templates/{template_file}') as tf:
+                config['cpp_template'] = tf.read()
+        print(config)
 
 
 if __name__ == '__main__':
@@ -192,6 +233,9 @@ if __name__ == '__main__':
     parser.add_argument('--create-class', type=str, help='Create a cpp and hpp file with boilerplate filled out')
 
     args = parser.parse_args()
+
+    init_data_dir()
+    read_config()
 
     if args.create_project:
         generate_project(args.create_project, use_conan=args.use_conan)
