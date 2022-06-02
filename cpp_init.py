@@ -1,4 +1,5 @@
 import os, argparse
+from datetime import date
 
 import yaml
 
@@ -24,6 +25,7 @@ struct %CLASS_NAME%_t {
 config = {
     'hpp_template': HPP_CLASS_TEMPLATE,
     'cpp_template': CPP_CLASS_TEMPLATE,
+    'preamble': '',
 }
 
 CONAN_TEMPLATE = '''
@@ -187,15 +189,21 @@ def create_cpp_class(class_name):
         if os.path.isdir(dir) == False:
             os.mkdir(dir)
 
+    todays_date = date.today()
+
+    def create_template(name, preamb = ''):
+        contents = config[name].replace('%CLASS_NAME%', class_name)
+        contents = contents.replace('%HEADER_PATH%', f'{class_sub_dir}{class_name}.hpp')
+        contents = contents.replace('%DATE%', str(todays_date))
+        return f'{preamb}\n{contents}'
+    
+    preamble = create_template('preamble')
+
     try:
         with open(f'{class_include}/{class_name}.hpp', 'x') as f:
-            hpp_contents = config['hpp_template'].replace('%CLASS_NAME%', class_name)
-            hpp_contents = hpp_contents.replace('%HEADER_PATH%', f'{class_sub_dir}{class_name}.hpp')
-            f.write(hpp_contents)
+            f.write(create_template('hpp_template', preamble))
         with open(f'{class_source}/{class_name}.cpp', 'x') as f:
-            cpp_contents = config['cpp_template'].replace('%CLASS_NAME%', class_name)
-            cpp_contents = cpp_contents.replace('%HEADER_PATH%', f'{class_sub_dir}{class_name}.hpp')
-            f.write(cpp_contents)
+            f.write(create_template('cpp_template', preamble))
         print(f'Created Class: {class_name} at {project_directory_path}')
     except Exception as e:
         print(f'Failed to create class: {class_name} ', e)
@@ -207,24 +215,25 @@ def init_data_dir():
     os.mkdir(f'{home_dir}/templates')
     with open(f'{home_dir}/config.yaml', 'x') as f:
         f.write('''hpp_template: default
-cpp_template: default''')
+cpp_template: default
+preamble: default''')
 
 def read_config():
     global config
     home_dir = os.path.expanduser('~/.cpp_init')
+
+    def load_template(name):
+        if yaml_config[name] != 'default':
+            template_file = yaml_config[name]
+            with open(f'{home_dir}/templates/{template_file}') as tf:
+                config[name] = tf.read()
+
     assert os.path.isdir(home_dir)
     with open(f'{home_dir}/config.yaml', 'r') as f:
         yaml_config = yaml.load(f, Loader=yaml.FullLoader)
-        if yaml_config['hpp_template'] != 'default':
-            template_file = yaml_config['hpp_template']
-            with open(f'{home_dir}/templates/{template_file}') as tf:
-                config['hpp_template'] = tf.read()
-        if yaml_config['cpp_template'] != 'default':
-            template_file = yaml_config['cpp_template']
-            with open(f'{home_dir}/templates/{template_file}') as tf:
-                config['cpp_template'] = tf.read()
-        print(config)
-
+        load_template('hpp_template')
+        load_template('cpp_template')
+        load_template('preamble')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
