@@ -8,6 +8,12 @@ I plan on adding static libs and dynamic libs later
 
 ## setup
 
+if you don't have ```pyyaml``` installed then run
+```
+python3 -m pip install --user pyyaml
+```
+or whatever your alias for python3 is
+
 install dependancies
 + cmake - https://cmake.org/
 + conan (optional) - https://conan.io/ 
