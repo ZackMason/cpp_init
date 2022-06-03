@@ -8,7 +8,13 @@ I plan on adding static libs and dynamic libs later
 
 ## setup
 
-install dependancies
+if you don't have ```pyyaml``` installed then run
+```
+python3 -m pip install --user pyyaml
+```
+or whatever your alias for python3 is
+
+install dependancies if you don't already have them
 + cmake - https://cmake.org/
 + conan (optional) - https://conan.io/ 
 
@@ -19,6 +25,10 @@ git clone https://github.com/ZackMason/cpp_init
 ```
 
 add the directory to your PATH and open a new shell
+
+if you are on linux you might want to add a shebang to the top of ```cpp_init.py``` so bash knows where to find python3 
+
+if you are on windows make sure the default program to launch .py files is python3
 
 run 
 ```
@@ -126,6 +136,7 @@ cmake_minimum_required(VERSION %CMAKE_VERSION%)
 project(%PROJECT_NAME% %LANGUAGES%)
 
 %CPP_VERSION%
+%C_VERSION%
 
 %CONAN_SETUP%
 
@@ -137,8 +148,6 @@ include_directories(include)
 
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
-
-%C_VERSION%
 
 %CONAN_LINK%
 
