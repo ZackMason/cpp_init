@@ -91,7 +91,9 @@ c-style source
 ---
 
 cpp-style header
+
 cpp style templates are created using ```--create-class```
+
 ```
 #pragma once
 
