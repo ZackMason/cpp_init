@@ -122,7 +122,7 @@ CORE_HPP_TEMPLATE = '''#pragma once
 
 #include "types.hpp"
 
-const std::string ASSETS_PATH = CMAKE_ASSETS_PATH;
+#define ASSETS_PATH std::string(CMAKE_ASSETS_PATH)
 
 constexpr int BIT(int x)
 {
