@@ -108,6 +108,29 @@ prologue
 
 ```
 
+---
 
+default CMakeLists.txt
+```
+cmake_minimum_required(VERSION %CMAKE_VERSION%)
+project(%PROJECT_NAME% %LANGUAGES%)
+
+%CPP_VERSION%
+%C_VERSION%
+
+%CONAN_SETUP%
+
+file(GLOB_RECURSE src_files 
+    ${PROJECT_SOURCE_DIR}/src/*.c*
+)
+
+include_directories(include)
+
+add_executable(${PROJECT_NAME} ${src_files})
+target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+%CONAN_LINK%
+
+```
 
 
