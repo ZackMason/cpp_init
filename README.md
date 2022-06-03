@@ -4,8 +4,8 @@ A python script for creating c/cpp projects that use cmake, with options for add
 ## setup
 
 install dependancies
-+ cmake https://cmake.org/
-+ conan https://conan.io/ (optional)
++ cmake - https://cmake.org/
++ conan (optional) - https://conan.io/ 
 
 clone the repo
 
