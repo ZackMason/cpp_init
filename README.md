@@ -38,8 +38,8 @@ will use my default templates.
 ## Flags
 + -h, --help
 + --create-project %PROJECT_NAME%
-+ --create-class [%CLASS_NAME%]
-+ --create-code [%CODE_NAME%]
++ --create-class [filepath/class_name]
++ --create-code [filepath/code_name]
 + --use-conan
 + --languages "CXX" | "C" | "CXX C"
 + --cpp-version %i
