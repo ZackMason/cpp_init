@@ -206,9 +206,8 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
         with open(f'{project_directory_path}/src/main.c', 'x') as f:
             f.write(config['main_c_template'])
 
-    if use_conan:
-        with open(f'{project_directory_path}/.vscode/settings.json', 'x') as f:
-            f.write(VSCODE_SETTINGS_JSON_TEMPLATE)
+    with open(f'{project_directory_path}/.vscode/settings.json', 'x') as f:
+        f.write(VSCODE_SETTINGS_JSON_TEMPLATE)
 
 def create_cpp_class(class_name, header_ext, source_ext):
     project_directory_path = os.getcwd()
