@@ -14,7 +14,7 @@ python3 -m pip install --user pyyaml
 ```
 or whatever your alias for python3 is
 
-install dependancies
+install dependancies if you don't already have them
 + cmake - https://cmake.org/
 + conan (optional) - https://conan.io/ 
 
