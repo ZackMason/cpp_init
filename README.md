@@ -56,9 +56,11 @@ run
 cpp_init.py --create-project example --use-conan --languages CXX
 ```
 if you don't want to use conan you can omit the ```--use-conan``` flag
+
+if there are dependancies that you need to use then add them to ```conanfile.txt```
 ```
 cd example/build
-conan install ..
+conan install .. // conan should give you instructions if something goes wrong here
 cmake ..
 cmake --build .
 ```
