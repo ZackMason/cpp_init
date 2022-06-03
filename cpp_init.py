@@ -60,7 +60,7 @@ static size_t tests_run = 0;
 static size_t tests_passed = 0;
 
 struct test_failed : std::exception {
-    const char* what() const override {
+    const char* what() const noexcept override {
         return "Assert Failed";
     }
 };
@@ -119,7 +119,6 @@ CORE_HPP_TEMPLATE = '''#pragma once
 #include <unordered_set>
 #include <functional>
 #include <algorithm>
-#include <filesystem>
 
 #include "types.hpp"
 
@@ -194,6 +193,8 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CUR
 file(GLOB_RECURSE test_files 
     ${PROJECT_SOURCE_DIR}/tests/*.c*
 )
+
+list(FILTER test_files EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/src/main.c*)
 
 add_executable(tests ${test_files})
 target_compile_definitions(tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
