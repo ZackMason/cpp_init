@@ -243,10 +243,12 @@ def create_cpp_class(class_name, header_ext, source_ext):
     epilogue = create_template('epilogue')
 
     try:
-        with open(f'{class_include}/{class_name}.{header_ext}', 'x') as f:
-            f.write(create_template('hpp_template' if header_ext == 'hpp' else 'h_template', prologue, epilogue))
-        with open(f'{class_source}/{class_name}.{source_ext}', 'x') as f:
-            f.write(create_template('cpp_template' if source_ext == 'cpp' else 'c_template', prologue, epilogue))
+        if header_ext:
+            with open(f'{class_include}/{class_name}.{header_ext}', 'x') as f:
+                f.write(create_template('hpp_template' if header_ext == 'hpp' else 'h_template', prologue, epilogue))
+        if source_ext:
+            with open(f'{class_source}/{class_name}.{source_ext}', 'x') as f:
+                f.write(create_template('cpp_template' if source_ext == 'cpp' else 'c_template', prologue, epilogue))
         print(f'Created Class: {class_name} in project {project_directory_path}')
     except Exception as e:
         print(f'Failed to create class: {class_name} ', e)
@@ -306,6 +308,8 @@ if __name__ == '__main__':
     parser.add_argument('--use-conan', default=False, action='store_true', help='Using conan package manager')
     parser.add_argument('--create-class', nargs='+',  type=str, help='Create a cpp and hpp file with boilerplate filled out, expects that you are in the root of your project')
     parser.add_argument('--create-code', nargs='+',  type=str, help='Create a c and h file with boilerplate filled out, expects that you are in the root of your project')
+    parser.add_argument('--create-header', nargs='+',  type=str, help='Create an h file with boilerplate filled out, expects that you are in the root of your project')
+    parser.add_argument('--create-source', nargs='+',  type=str, help='Create a c file with boilerplate filled out, expects that you are in the root of your project')
 
     args = parser.parse_args()
 
@@ -324,3 +328,9 @@ if __name__ == '__main__':
     elif args.create_class:
         for name in args.create_class:
             create_cpp_class(name, 'hpp', 'cpp')
+    elif args.create_header:
+        for name in args.create_header:
+            create_cpp_class(name, 'h', '')
+    elif args.create_source:
+        for name in args.create_source:
+            create_cpp_class(name, '', 'c')
