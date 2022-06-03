@@ -79,6 +79,13 @@ typedef struct %CODE_NAME%_t {
 
 ---
 
+c-style source
+```
+#include "%HEADER_PATH%"
+```
+
+---
+
 cpp-style header
 ```
 #pragma once
