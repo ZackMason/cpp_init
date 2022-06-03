@@ -191,7 +191,11 @@ include_directories(include)
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
-add_executable(tests tests/tests.cpp)
+file(GLOB_RECURSE test_files 
+    ${PROJECT_SOURCE_DIR}/tests/*.c*
+)
+
+add_executable(tests ${test_files})
 target_compile_definitions(tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
 %CONAN_LINK%
