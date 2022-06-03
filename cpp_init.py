@@ -301,7 +301,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--create-project', type=str, help='Create a cpp project in the current directory')
     parser.add_argument('--languages', type=str, nargs='+', help='The languages used by the project', default=['C', 'CXX'])
-    parser.add_argument('--cpp-version', type=int, help='The cpp version to use', default=20)
+    parser.add_argument('--cpp-version', type=int, help='The cpp version to use', default=11)
     parser.add_argument('--c-version', type=int, help='The c version to use', default=11)
     parser.add_argument('--use-conan', default=False, action='store_true', help='Using conan package manager')
     parser.add_argument('--create-class', nargs='+',  type=str, help='Create a cpp and hpp file with boilerplate filled out, expects that you are in the root of your project')
