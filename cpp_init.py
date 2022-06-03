@@ -288,6 +288,7 @@ def read_config():
         load_template('hpp_template')
         load_template('cpp_template')
         load_template('prologue')
+        load_template('epilogue')
         load_template('types_hpp_template')
         load_template('core_hpp_template')
         load_template('types_hpp_template')
@@ -302,8 +303,8 @@ if __name__ == '__main__':
     parser.add_argument('--cpp-version', type=int, help='The cpp version to use', default=20)
     parser.add_argument('--c-version', type=int, help='The c version to use', default=11)
     parser.add_argument('--use-conan', default=False, action='store_true', help='Using conan package manager')
-    parser.add_argument('--create-class', nargs='+',  type=str, help='Create a cpp and hpp file with boilerplate filled out')
-    parser.add_argument('--create-code', nargs='+',  type=str, help='Create a c and h file with boilerplate filled out')
+    parser.add_argument('--create-class', nargs='+',  type=str, help='Create a cpp and hpp file with boilerplate filled out, expects that you are in the root of your project')
+    parser.add_argument('--create-code', nargs='+',  type=str, help='Create a c and h file with boilerplate filled out, expects that you are in the root of your project')
 
     args = parser.parse_args()
 
