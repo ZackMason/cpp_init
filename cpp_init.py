@@ -132,25 +132,26 @@ CONAN_LINK_TEMPLATE = '''target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})'''
 CPP_VERSION_TEMPLATE = '''set(CMAKE_CXX_STANDARD %i)
 set(CMAKE_CXX_STANDARD_REQUIRED True)'''
 
-C_VERSION_TEMPLATE = '''set(CMAKE_C_STANDARD C%i)'''
+C_VERSION_TEMPLATE = '''target_compile_features(${PROJECT_NAME} PUBLIC c_std_%i)'''
 
 # [project_name, c++ version]
 CMAKE_TEMPLATE = '''cmake_minimum_required(VERSION %CMAKE_VERSION%)
 project(%PROJECT_NAME% %LANGUAGES%)
 
 %CPP_VERSION%
-%C_VERSION%
 
 %CONAN_SETUP%
 
 file(GLOB_RECURSE src_files 
-    ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/*.c*
 )
 
 include_directories(include)
 
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+%C_VERSION%
 
 %CONAN_LINK%
 '''
