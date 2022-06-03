@@ -1,8 +1,5 @@
-import os, argparse
+import os, argparse, yaml
 from datetime import date
-
-import yaml
-
 
 code_template_keywords = [
     'CLASS_NAME',
@@ -20,14 +17,12 @@ CPP_CLASS_TEMPLATE = '''#include "%HEADER_PATH%"
 
 
 '''
-
 HPP_CLASS_TEMPLATE = '''#pragma once
 
 struct %CLASS_NAME% {
 
 };
 '''
-
 H_CODE_TEMPLATE = '''#ifndef %^^CODE_NAME%_H
 #define %^^CODE_NAME%_H
 
@@ -37,10 +32,8 @@ typedef struct %CODE_NAME%_t {
 
 #endif /* %^^CODE_NAME%_H */
 '''
-
 C_CODE_TEMPLATE = '''#include "%HEADER_PATH%"
 '''
-
 MAIN_C_TEMPLATE = '''#include "stdio.h"
 
 int main(int argc, char** argv)
@@ -50,7 +43,6 @@ int main(int argc, char** argv)
     return 0;
 }
 '''
-
 MAIN_CPP_TEMPLATE = '''#include "core.hpp"
 
 int main(int argc, char** argv)
@@ -60,7 +52,15 @@ int main(int argc, char** argv)
     return 0;
 }
 '''
+TESTS_CPP_TEMPLATE = '''#include <iostream>
 
+int main(int argc, char** argv)
+{
+    std::cout << "Tests Succeeded!" << std::endl;
+
+    return 0;
+}
+'''
 CORE_HPP_TEMPLATE = '''#pragma once
 
 #include <memory>
@@ -87,7 +87,6 @@ constexpr int BIT(int x)
 	return 1 << x;
 }
 '''
-
 TYPES_HPP_TEMPLATE = '''#pragma once
 
 using u8  = uint8_t;
@@ -113,28 +112,24 @@ config = {
     'core_hpp_template': CORE_HPP_TEMPLATE,
     'main_cpp_template': MAIN_CPP_TEMPLATE,
     'main_c_template': MAIN_C_TEMPLATE,
+    'tests_cpp_template': TESTS_CPP_TEMPLATE,
     'prologue': '',
     'epilogue': '',
     'cmake_version': '2.8.12'
 }
-
 CONAN_TEMPLATE = '''[requires]
 
 [generators]
 cmake
 '''
-
 CONAN_SETUP_TEMPLATE = '''include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()'''
-
-CONAN_LINK_TEMPLATE = '''target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})'''
-
+CONAN_LINK_TEMPLATE = '''target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(tests ${CONAN_LIBS})
+'''
 CPP_VERSION_TEMPLATE = '''set(CMAKE_CXX_STANDARD %i)
 set(CMAKE_CXX_STANDARD_REQUIRED True)'''
-
 C_VERSION_TEMPLATE = '''set(CMAKE_C_STANDARD %i)'''
-
-# [project_name, c++ version]
 CMAKE_TEMPLATE = '''cmake_minimum_required(VERSION %CMAKE_VERSION%)
 project(%PROJECT_NAME% %LANGUAGES%)
 
@@ -152,10 +147,11 @@ include_directories(include)
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
+add_executable(tests tests/tests.cpp)
+target_compile_definitions(tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
 %CONAN_LINK%
 '''
-
-
 VSCODE_SETTINGS_JSON_TEMPLATE = '''{
     "C_Cpp.clang_format_path": "/usr/lib/llvm-10/bin/clang-format",
     "C_Cpp.default.includePath": [
@@ -192,6 +188,7 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
     os.mkdir(f'{project_directory_path}/src')
     os.mkdir(f'{project_directory_path}/include')
     os.mkdir(f'{project_directory_path}/assets')
+    os.mkdir(f'{project_directory_path}/tests')
     os.mkdir(f'{project_directory_path}/build')
     os.mkdir(f'{project_directory_path}/.vscode')
 
@@ -202,6 +199,8 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
             f.write(config['core_hpp_template'])
         with open(f'{project_directory_path}/include/types.hpp', 'x') as f:
             f.write(config['types_hpp_template'])
+        with open(f'{project_directory_path}/tests/tests.cpp', 'x') as f:
+            f.write(config['tests_cpp_template'])
     else:
         with open(f'{project_directory_path}/src/main.c', 'x') as f:
             f.write(config['main_c_template'])
@@ -266,6 +265,7 @@ types_hpp_template: none
 core_hpp_template: none
 main_cpp_template: default
 main_c_template: default
+tests_cpp_template: default
 cmake_version: default''')
 
 def read_config():
@@ -294,6 +294,7 @@ def read_config():
         load_template('core_hpp_template')
         load_template('types_hpp_template')
         load_template('main_cpp_template')
+        load_template('tests_cpp_template')
         load_template('main_c_template')
         load_template('cmake_version')
 
