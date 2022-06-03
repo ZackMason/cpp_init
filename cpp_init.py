@@ -53,11 +53,54 @@ int main(int argc, char** argv)
 }
 '''
 TESTS_CPP_TEMPLATE = '''#include <iostream>
+#include <cassert>
+#include <exception>
 
-int main(int argc, char** argv)
-{
-    std::cout << "Tests Succeeded!" << std::endl;
+static size_t tests_run = 0;
+static size_t tests_passed = 0;
 
+struct test_failed : std::exception {
+    const char* what() const override {
+        return "Assert Failed";
+    }
+};
+
+constexpr auto throw_assert(bool b) -> auto {
+    if (!b) throw test_failed();
+}
+
+template <typename Fn>
+auto run_test(const char* name, const Fn& test) -> auto {
+    ++tests_run;
+    try {
+        test();
+        ++tests_passed;
+        std::cout << "Succeeded: " << name << std::endl;
+    } catch (std::exception & e) {
+        std::cout << "Failed: " << name << " - " << e.what() << std::endl;
+    }
+}
+
+int main(int argc, char** argv) {
+    run_test("equal", [](){
+        throw_assert(1 == 1);
+    });
+
+    run_test("fail_test", [](){
+        throw_assert(0 == 1);
+    });
+
+    std::cout << tests_passed << " / " << tests_run << " Tests Succeeded!" << std::endl;
+    return 0;
+}
+'''
+TESTS_C_TEMPLATE = '''#include "stdio.h"
+
+int tests_passed = 0;
+int tests_run = 0;
+
+int main(int argc, char** argv) {
+    printf("%i / %i Tests Succeeded!\\n", tests_passed, tests_run);
     return 0;
 }
 '''
@@ -113,6 +156,7 @@ config = {
     'main_cpp_template': MAIN_CPP_TEMPLATE,
     'main_c_template': MAIN_C_TEMPLATE,
     'tests_cpp_template': TESTS_CPP_TEMPLATE,
+    'tests_c_template': TESTS_C_TEMPLATE,
     'prologue': '',
     'epilogue': '',
     'cmake_version': '2.8.12'
@@ -204,6 +248,8 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
     else:
         with open(f'{project_directory_path}/src/main.c', 'x') as f:
             f.write(config['main_c_template'])
+        with open(f'{project_directory_path}/test/tests.c', 'x') as f:
+            f.write(config['tests_c_template'])
 
     with open(f'{project_directory_path}/.vscode/settings.json', 'x') as f:
         f.write(VSCODE_SETTINGS_JSON_TEMPLATE)
@@ -266,6 +312,7 @@ core_hpp_template: none
 main_cpp_template: default
 main_c_template: default
 tests_cpp_template: default
+tests_c_template: default
 cmake_version: default''')
 
 def read_config():
@@ -295,6 +342,7 @@ def read_config():
         load_template('types_hpp_template')
         load_template('main_cpp_template')
         load_template('tests_cpp_template')
+        load_template('tests_c_template')
         load_template('main_c_template')
         load_template('cmake_version')
 
