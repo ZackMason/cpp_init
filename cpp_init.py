@@ -144,22 +144,6 @@ using i64 = int64_t;
 using f32 = float;
 using f64 = double;
 '''
-
-config = {
-    'hpp_template': HPP_CLASS_TEMPLATE,
-    'cpp_template': CPP_CLASS_TEMPLATE,
-    'c_template': C_CODE_TEMPLATE,
-    'h_template': H_CODE_TEMPLATE,
-    'types_hpp_template': TYPES_HPP_TEMPLATE,
-    'core_hpp_template': CORE_HPP_TEMPLATE,
-    'main_cpp_template': MAIN_CPP_TEMPLATE,
-    'main_c_template': MAIN_C_TEMPLATE,
-    'tests_cpp_template': TESTS_CPP_TEMPLATE,
-    'tests_c_template': TESTS_C_TEMPLATE,
-    'prologue': '',
-    'epilogue': '',
-    'cmake_version': '2.8.12'
-}
 CONAN_TEMPLATE = '''[requires]
 
 [generators]
@@ -168,11 +152,20 @@ cmake
 CONAN_SETUP_TEMPLATE = '''include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()'''
 CONAN_LINK_TEMPLATE = '''target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-target_link_libraries(tests ${CONAN_LIBS})
+'''
+CONAN_LINK_TESTS_TEMPLATE = '''target_link_libraries(tests ${CONAN_LIBS})
 '''
 CPP_VERSION_TEMPLATE = '''set(CMAKE_CXX_STANDARD %i)
 set(CMAKE_CXX_STANDARD_REQUIRED True)'''
 C_VERSION_TEMPLATE = '''set(CMAKE_C_STANDARD %i)'''
+CMAKE_TESTS_TEMPLATE = '''file(GLOB_RECURSE test_files 
+    ${PROJECT_SOURCE_DIR}/tests/*.c*
+)
+list(FILTER test_files EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/src/main.c*)
+
+add_executable(tests ${test_files})
+target_compile_definitions(tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+%s'''
 CMAKE_TEMPLATE = '''cmake_minimum_required(VERSION %CMAKE_VERSION%)
 project(%PROJECT_NAME% %LANGUAGES%)
 
@@ -190,15 +183,7 @@ include_directories(include)
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
-file(GLOB_RECURSE test_files 
-    ${PROJECT_SOURCE_DIR}/tests/*.c*
-)
-
-list(FILTER test_files EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/src/main.c*)
-
-add_executable(tests ${test_files})
-target_compile_definitions(tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
-
+%CMAKE_TESTS%
 %CONAN_LINK%
 '''
 VSCODE_SETTINGS_JSON_TEMPLATE = '''{
@@ -212,7 +197,24 @@ VSCODE_SETTINGS_JSON_TEMPLATE = '''{
     }
 }'''
 
-def generate_project(project_name, use_conan, languages, cpp_version, c_version):
+config = {
+    'hpp_template': HPP_CLASS_TEMPLATE,
+    'cpp_template': CPP_CLASS_TEMPLATE,
+    'c_template': C_CODE_TEMPLATE,
+    'h_template': H_CODE_TEMPLATE,
+    'cmake_template': CMAKE_TEMPLATE,
+    'types_hpp_template': TYPES_HPP_TEMPLATE,
+    'core_hpp_template': CORE_HPP_TEMPLATE,
+    'main_cpp_template': MAIN_CPP_TEMPLATE,
+    'main_c_template': MAIN_C_TEMPLATE,
+    'tests_cpp_template': TESTS_CPP_TEMPLATE,
+    'tests_c_template': TESTS_C_TEMPLATE,
+    'prologue': '',
+    'epilogue': '',
+    'cmake_version': '2.8.12'
+}
+
+def generate_project(project_name, use_conan, languages, cpp_version, c_version, use_vscode):
     project_directory_path = os.getcwd() + '/' + project_name
     print(f'Creating directory: {project_directory_path}')
     os.mkdir(project_directory_path)
@@ -224,12 +226,13 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
 
     print(f'Creating CMakeLists.txt')
     with open(f'{project_directory_path}/CMakeLists.txt', 'x') as f:
-        template = CMAKE_TEMPLATE
+        template = config['cmake_template']
         template = template.replace('%CMAKE_VERSION%', config['cmake_version'])
         template = template.replace('%PROJECT_NAME%', project_name)
         template = template.replace('%LANGUAGES%', ' '.join(languages))
         template = template.replace('%CONAN_SETUP%', CONAN_SETUP_TEMPLATE if use_conan else '')
         template = template.replace('%CONAN_LINK%', CONAN_LINK_TEMPLATE if use_conan else '')
+        template = template.replace('%CMAKE_TESTS%', CMAKE_TESTS_TEMPLATE % (CONAN_LINK_TESTS_TEMPLATE if use_conan else ''))
         template = template.replace('%CPP_VERSION%', (CPP_VERSION_TEMPLATE % cpp_version) if 'CXX' in languages else '')
         template = template.replace('%C_VERSION%', (C_VERSION_TEMPLATE % c_version) if 'C' in languages else '')
         f.write(template)
@@ -239,7 +242,10 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
     os.mkdir(f'{project_directory_path}/assets')
     os.mkdir(f'{project_directory_path}/tests')
     os.mkdir(f'{project_directory_path}/build')
-    os.mkdir(f'{project_directory_path}/.vscode')
+    if use_vscode:
+        os.mkdir(f'{project_directory_path}/.vscode')
+        with open(f'{project_directory_path}/.vscode/settings.json', 'x') as f:
+            f.write(VSCODE_SETTINGS_JSON_TEMPLATE)
 
     if 'CXX' in languages:
         with open(f'{project_directory_path}/src/main.cpp', 'x') as f:
@@ -255,9 +261,6 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
             f.write(config['main_c_template'])
         with open(f'{project_directory_path}/tests/tests.c', 'x') as f:
             f.write(config['tests_c_template'])
-
-    with open(f'{project_directory_path}/.vscode/settings.json', 'x') as f:
-        f.write(VSCODE_SETTINGS_JSON_TEMPLATE)
 
 def create_cpp_class(class_name, header_ext, source_ext):
     project_directory_path = os.getcwd()
@@ -310,6 +313,7 @@ def init_data_dir():
     with open(f'{home_dir}/config.yaml', 'x') as f:
         f.write('''hpp_template: default
 cpp_template: default
+cmake_template: default
 prologue: default
 epilogue: none
 types_hpp_template: none
@@ -340,6 +344,7 @@ def read_config():
         yaml_config = yaml.load(f, Loader=yaml.FullLoader)
         load_template('hpp_template')
         load_template('cpp_template')
+        load_template('cmake_template')
         load_template('prologue')
         load_template('epilogue')
         load_template('types_hpp_template')
@@ -358,6 +363,7 @@ if __name__ == '__main__':
     parser.add_argument('--cpp-version', type=int, help='The cpp version to use', default=11)
     parser.add_argument('--c-version', type=int, help='The c version to use', default=11)
     parser.add_argument('--use-conan', default=False, action='store_true', help='Using conan package manager')
+    parser.add_argument('--no-vscode', default=True, action='store_false', help='Turns off the generator for .vscode/settings.json')
     parser.add_argument('--create-class', nargs='+',  type=str, help='Create a cpp and hpp file with boilerplate filled out, expects that you are in the root of your project')
     parser.add_argument('--create-code', nargs='+',  type=str, help='Create a c and h file with boilerplate filled out, expects that you are in the root of your project')
     parser.add_argument('--create-header', nargs='+',  type=str, help='Create an h file with boilerplate filled out, expects that you are in the root of your project')
@@ -373,7 +379,8 @@ if __name__ == '__main__':
             use_conan=args.use_conan,
             languages=args.languages,
             cpp_version=args.cpp_version,
-            c_version=args.c_version)
+            c_version=args.c_version,
+            use_vscode=not args.no_vscode)
     if args.create_code:
         for name in args.create_code:
             create_cpp_class(name, 'h', 'c')
