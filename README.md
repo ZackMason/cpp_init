@@ -3,6 +3,9 @@ A python script for creating c/cpp projects that use cmake, with options for add
 
 you can expand much of the functionallity creating templates in ```~/.cpp_init/templates``` and setting the path in ```~/.cpp_init/config.yaml``` (more info below)
 
+right now there are only options for creating executable projects
+I plan on adding static libs and dynamic libs later
+
 ## setup
 
 install dependancies
