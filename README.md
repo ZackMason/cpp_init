@@ -121,7 +121,7 @@ project(%PROJECT_NAME% %LANGUAGES%)
 %CONAN_SETUP%
 
 file(GLOB_RECURSE src_files 
-    ${PROJECT_SOURCE_DIR}/src/*.cpp
+    ${PROJECT_SOURCE_DIR}/src/*.c*
 )
 
 include_directories(include)
