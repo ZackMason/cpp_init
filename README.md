@@ -1,6 +1,11 @@
 # cpp_init
 A python script for creating c/cpp projects that use cmake, with options for adding conan libraries
 
+you can expand much of the functionallity creating templates in ```~/.cpp_init/templates``` and setting the path in ```~/.cpp_init/config.yaml``` (more info below)
+
+right now there are only options for creating executable projects
+I plan on adding static libs and dynamic libs later
+
 ## setup
 
 install dependancies
@@ -56,9 +61,11 @@ run
 cpp_init.py --create-project example --use-conan --languages CXX
 ```
 if you don't want to use conan you can omit the ```--use-conan``` flag
+
+if there are dependancies that you need to use then add them to ```conanfile.txt```
 ```
 cd example/build
-conan install ..
+conan install .. // conan should give you instructions if something goes wrong here
 cmake ..
 cmake --build .
 ```
@@ -91,6 +98,9 @@ c-style source
 ---
 
 cpp-style header
+
+cpp style templates are created using ```--create-class```
+
 ```
 #pragma once
 
@@ -116,7 +126,6 @@ cmake_minimum_required(VERSION %CMAKE_VERSION%)
 project(%PROJECT_NAME% %LANGUAGES%)
 
 %CPP_VERSION%
-%C_VERSION%
 
 %CONAN_SETUP%
 
@@ -128,6 +137,8 @@ include_directories(include)
 
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+%C_VERSION%
 
 %CONAN_LINK%
 
