@@ -26,7 +26,7 @@ git clone https://github.com/ZackMason/cpp_init
 
 add the directory to your PATH and open a new shell
 
-you might want to add a shebang to the top of the file so bash knows where to find python3 if you are on linux
+you might want to add a shebang to the top of ```cpp_init.py``` so bash knows where to find python3 if you are on linux
 
 if you are on windows make sure the default program to launch .py files is python3
 
