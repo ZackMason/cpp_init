@@ -35,7 +35,6 @@ cmake_version: default
 notice the use of ```none``` in ```epilogue``` which will use an empty string in its place, this is different than default which
 will use my default templates.
 
----
 ## Flags
 + -h, --help
 + --create-project %PROJECT_NAME%
@@ -46,7 +45,6 @@ will use my default templates.
 + --cpp-version %i
 + --c-version %i
 
----
 ## Creating and Building your project
 
 run 
@@ -62,8 +60,7 @@ cmake --build .
 ```
 
 
----
-### Example Templates
+## Example Templates
 
 c-style header
 ```
