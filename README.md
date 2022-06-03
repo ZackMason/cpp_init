@@ -154,7 +154,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CUR
 ```
 
 ---
-## TODO
+## TODO - feel free to help :)
 
 + add vcpkg support
 + multiple profiles in config.yaml
