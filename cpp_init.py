@@ -248,7 +248,7 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version)
     else:
         with open(f'{project_directory_path}/src/main.c', 'x') as f:
             f.write(config['main_c_template'])
-        with open(f'{project_directory_path}/test/tests.c', 'x') as f:
+        with open(f'{project_directory_path}/tests/tests.c', 'x') as f:
             f.write(config['tests_c_template'])
 
     with open(f'{project_directory_path}/.vscode/settings.json', 'x') as f:
