@@ -1,5 +1,5 @@
 # cpp_init
-A python script for creating c/cpp projects that use cmake, with options for adding conan libraries
+A python script for creating c/cpp projects that use cmake, with options for adding conan libraries and code templates
 
 you can expand much of the functionallity creating templates in ```~/.cpp_init/templates``` and setting the path in ```~/.cpp_init/config.yaml``` (more info below)
 
@@ -152,5 +152,14 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CUR
 %CONAN_LINK%
 
 ```
+
+---
+## TODO - feel free to help :)
+
++ add vcpkg support
++ multiple profiles in config.yaml
++ emscripten support
+
+
 
 
