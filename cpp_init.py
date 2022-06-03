@@ -262,8 +262,8 @@ def init_data_dir():
 cpp_template: default
 prologue: default
 epilogue: none
-types_hpp_template: default
-core_hpp_template: default
+types_hpp_template: none
+core_hpp_template: none
 main_cpp_template: default
 main_c_template: default
 cmake_version: default''')
