@@ -1,5 +1,6 @@
 import os, argparse, yaml
 from datetime import date
+from random import choice
 
 code_template_keywords = [
     'CLASS_NAME',
@@ -11,6 +12,13 @@ code_template_keywords = [
     'HEADER_PATH',
     'SOURCE_PATH',
     'DATE',
+    'RANDOM_GREETING',
+]
+
+greetings = [
+    'Hello World!',
+    'Hello Captain!',
+    'Hello Sailor!',
 ]
 
 CPP_CLASS_TEMPLATE = '''#include "%HEADER_PATH%"
@@ -43,7 +51,7 @@ int main(int argc, char** argv)
     return 0;
 }
 '''
-MAIN_CPP_TEMPLATE = '''#include "core.hpp"
+MAIN_CPP_TEMPLATE = '''#include <iostream>
 
 int main(int argc, char** argv)
 {
@@ -198,11 +206,14 @@ VSCODE_SETTINGS_JSON_TEMPLATE = '''{
 }'''
 
 config = {
+    'cpp_version_template': CPP_VERSION_TEMPLATE,
+    'c_version_template': C_VERSION_TEMPLATE,
     'hpp_template': HPP_CLASS_TEMPLATE,
     'cpp_template': CPP_CLASS_TEMPLATE,
     'c_template': C_CODE_TEMPLATE,
     'h_template': H_CODE_TEMPLATE,
     'cmake_template': CMAKE_TEMPLATE,
+    'cmake_tests_template': CMAKE_TESTS_TEMPLATE,
     'types_hpp_template': TYPES_HPP_TEMPLATE,
     'core_hpp_template': CORE_HPP_TEMPLATE,
     'main_cpp_template': MAIN_CPP_TEMPLATE,
@@ -232,9 +243,9 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version,
         template = template.replace('%LANGUAGES%', ' '.join(languages))
         template = template.replace('%CONAN_SETUP%', CONAN_SETUP_TEMPLATE if use_conan else '')
         template = template.replace('%CONAN_LINK%', CONAN_LINK_TEMPLATE if use_conan else '')
-        template = template.replace('%CMAKE_TESTS%', CMAKE_TESTS_TEMPLATE % (CONAN_LINK_TESTS_TEMPLATE if use_conan else ''))
-        template = template.replace('%CPP_VERSION%', (CPP_VERSION_TEMPLATE % cpp_version) if 'CXX' in languages else '')
-        template = template.replace('%C_VERSION%', (C_VERSION_TEMPLATE % c_version) if 'C' in languages else '')
+        template = template.replace('%CMAKE_TESTS%', config['cmake_tests_template'] % (CONAN_LINK_TESTS_TEMPLATE if use_conan else ''))
+        template = template.replace('%CPP_VERSION%', (config['cpp_version_template'] % cpp_version) if 'CXX' in languages else '')
+        template = template.replace('%C_VERSION%', (config['c_version_template'] % c_version) if 'C' in languages else '')
         f.write(template)
 
     os.mkdir(f'{project_directory_path}/src')
@@ -250,10 +261,13 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version,
     if 'CXX' in languages:
         with open(f'{project_directory_path}/src/main.cpp', 'x') as f:
             f.write(config['main_cpp_template'])
-        with open(f'{project_directory_path}/include/core.hpp', 'x') as f:
-            f.write(config['core_hpp_template'])
-        with open(f'{project_directory_path}/include/types.hpp', 'x') as f:
-            f.write(config['types_hpp_template'])
+
+        if config['core_hpp_template']:
+            with open(f'{project_directory_path}/include/core.hpp', 'x') as f:
+                f.write(config['core_hpp_template'])
+        if config['types_hpp_template']:
+            with open(f'{project_directory_path}/include/types.hpp', 'x') as f:
+                f.write(config['types_hpp_template'])
         with open(f'{project_directory_path}/tests/tests.cpp', 'x') as f:
             f.write(config['tests_cpp_template'])
     else:
@@ -287,6 +301,7 @@ def create_cpp_class(class_name, header_ext, source_ext):
         contents = contents.replace('%HEADER_PATH%', f'{sub_dir}{class_name}.{header_ext}')
         contents = contents.replace('%SOURCE_PATH%', f'{sub_dir}{class_name}.{source_ext}')
         contents = contents.replace('%DATE%', str(todays_date))
+        contents = contents.replace('%RANDOM_GREETING%', choice(greetings))
         sep = '\n' if prologue else ''
         return f'{prologue}{sep}{contents}{epilogue}'
     
@@ -313,7 +328,10 @@ def init_data_dir():
     with open(f'{home_dir}/config.yaml', 'x') as f:
         f.write('''hpp_template: default
 cpp_template: default
+cpp_version_template: default
+c_version_template: default
 cmake_template: default
+cmake_tests_template: default
 prologue: default
 epilogue: none
 types_hpp_template: none
@@ -344,7 +362,10 @@ def read_config():
         yaml_config = yaml.load(f, Loader=yaml.FullLoader)
         load_template('hpp_template')
         load_template('cpp_template')
+        load_template('cpp_version_template')
+        load_template('c_version_template')
         load_template('cmake_template')
+        load_template('cmake_tests_template')
         load_template('prologue')
         load_template('epilogue')
         load_template('types_hpp_template')
