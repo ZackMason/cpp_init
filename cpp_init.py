@@ -139,6 +139,7 @@ CMAKE_TEMPLATE = '''cmake_minimum_required(VERSION %CMAKE_VERSION%)
 project(%PROJECT_NAME% %LANGUAGES%)
 
 %CPP_VERSION%
+%C_VERSION%
 
 %CONAN_SETUP%
 
@@ -150,8 +151,6 @@ include_directories(include)
 
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
-
-%C_VERSION%
 
 %CONAN_LINK%
 '''
