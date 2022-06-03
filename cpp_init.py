@@ -18,7 +18,7 @@ CPP_CLASS_TEMPLATE = '''#include "%HEADER_PATH%"
 
 HPP_CLASS_TEMPLATE = '''#pragma once
 
-struct %CLASS_NAME%_t {
+struct %CLASS_NAME% {
 
 };
 '''
@@ -29,42 +29,30 @@ config = {
     'preamble': '',
 }
 
-CONAN_TEMPLATE = '''
-[requires]
+CONAN_TEMPLATE = '''[requires]
 
 [generators]
 cmake
 '''
 
+CONAN_SETUP_TEMPLATE = '''include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()'''
+
+CONAN_LINK_TEMPLATE = '''target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})'''
+
+CPP_VERSION_TEMPLATE = '''set(CMAKE_CXX_STANDARD %i)
+set(CMAKE_CXX_STANDARD_REQUIRED True)'''
+
+C_VERSION_TEMPLATE = '''set(CMAKE_C_STANDARD %i)'''
+
 # [project_name, c++ version]
-CMAKE_CONAN_TEMPLATE = '''
-cmake_minimum_required(VERSION 2.8.12)
-project(%s C CXX)
+CMAKE_TEMPLATE = '''cmake_minimum_required(VERSION 2.8.12)
+project(%PROJECT_NAME% %LANGUAGES%)
 
-set(CMAKE_CXX_STANDARD %i)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+%CPP_VERSION%
+%C_VERSION%
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
-file(GLOB_RECURSE src_files 
-    ${PROJECT_SOURCE_DIR}/src/*.cpp
-)
-
-include_directories(include)
-
-add_executable(${PROJECT_NAME} ${src_files})
-target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
-
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-'''
-
-CMAKE_TEMPLATE = '''
-cmake_minimum_required(VERSION 2.8.12)
-project(%s C CXX)
-
-set(CMAKE_CXX_STANDARD %i)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+%CONAN_SETUP%
 
 file(GLOB_RECURSE src_files 
     ${PROJECT_SOURCE_DIR}/src/*.cpp
@@ -74,10 +62,11 @@ include_directories(include)
 
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+%CONAN_LINK%
 '''
 
-MAIN_CPP_TEMPLATE = '''
-#include "core.hpp"
+MAIN_CPP_TEMPLATE = '''#include "core.hpp"
 
 int main(int argc, char** argv)
 {
@@ -87,8 +76,7 @@ int main(int argc, char** argv)
 }
 '''
 
-CORE_HPP_TEMPLATE = '''
-#pragma once
+CORE_HPP_TEMPLATE = '''#pragma once
 
 #include <memory>
 #include <iostream>
@@ -115,8 +103,7 @@ constexpr int BIT(int x)
 }
 '''
 
-TYPES_HPP_TEMPLATE = '''
-#pragma once
+TYPES_HPP_TEMPLATE = '''#pragma once
 
 using u8  = uint8_t;
 using u16 = uint16_t;
@@ -143,7 +130,7 @@ VSCODE_SETTINGS_JSON_TEMPLATE = '''{
     }
 }'''
 
-def generate_project(project_name, use_conan):
+def generate_project(project_name, use_conan, languages, cpp_version, c_version):
     project_directory_path = os.getcwd() + '/' + project_name
     print(f'Creating directory: {project_directory_path}')
     os.mkdir(project_directory_path)
@@ -155,7 +142,14 @@ def generate_project(project_name, use_conan):
 
     print(f'Creating CMakeLists.txt')
     with open(f'{project_directory_path}/CMakeLists.txt', 'x') as f:
-        f.write((CMAKE_CONAN_TEMPLATE if use_conan else CMAKE_TEMPLATE) % (project_name, 20))
+        template = CMAKE_TEMPLATE
+        template = template.replace('%PROJECT_NAME%', project_name)
+        template = template.replace('%LANGUAGES%', ' '.join(languages))
+        template = template.replace('%CONAN_SETUP%', CONAN_SETUP_TEMPLATE if use_conan else '')
+        template = template.replace('%CONAN_LINK%', CONAN_LINK_TEMPLATE if use_conan else '')
+        template = template.replace('%CPP_VERSION%', (CPP_VERSION_TEMPLATE % cpp_version) if 'CXX' in languages else '')
+        template = template.replace('%C_VERSION%', (C_VERSION_TEMPLATE % c_version) if 'C' in languages else '')
+        f.write(template)
 
     os.mkdir(f'{project_directory_path}/src')
     os.mkdir(f'{project_directory_path}/include')
@@ -179,23 +173,22 @@ def generate_project(project_name, use_conan):
 def create_cpp_class(class_name):
     project_directory_path = os.getcwd()
 
-    class_sub_dir = class_name.split('/')
-    class_name = class_sub_dir[-1]
-    class_sub_dir = '/'.join(class_sub_dir[:-1]) + ('/' if class_sub_dir[:-1] else '')
+    class_sub_dir, class_name = os.path.split(class_name)
 
     class_include = f'{project_directory_path}/include/{class_sub_dir}'
     class_source = f'{project_directory_path}/src/{class_sub_dir}'
 
     for dir in [class_include, class_source]:
         if os.path.isdir(dir) == False:
-            os.mkdir(dir)
+            os.makedirs(dir, exist_ok=True)
 
     todays_date = date.today()
 
     def create_template(name, preamb = ''):
         contents = config[name].replace('%CLASS_NAME%', class_name)
-        contents = contents.replace('%HEADER_PATH%', f'{class_sub_dir}{class_name}.hpp')
-        contents = contents.replace('%SOURCE_PATH%', f'{class_sub_dir}{class_name}.cpp')
+        sub_dir = class_sub_dir + '/' if class_sub_dir else ''
+        contents = contents.replace('%HEADER_PATH%', f'{sub_dir}{class_name}.hpp')
+        contents = contents.replace('%SOURCE_PATH%', f'{sub_dir}{class_name}.cpp')
         contents = contents.replace('%DATE%', str(todays_date))
         sep = '\n' if preamb else ''
         return f'{preamb}{sep}{contents}'
@@ -207,7 +200,7 @@ def create_cpp_class(class_name):
             f.write(create_template('hpp_template', preamble))
         with open(f'{class_source}/{class_name}.cpp', 'x') as f:
             f.write(create_template('cpp_template', preamble))
-        print(f'Created Class: {class_name} at {project_directory_path}')
+        print(f'Created Class: {class_name} in project {project_directory_path}')
     except Exception as e:
         print(f'Failed to create class: {class_name} ', e)
 
@@ -241,8 +234,11 @@ def read_config():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--create-project', type=str, help='Create a cpp project in the current directory')
-    parser.add_argument('--use-conan', type=bool, default=True, help='Using conan package manager')
-    parser.add_argument('--create-class', type=str, help='Create a cpp and hpp file with boilerplate filled out')
+    parser.add_argument('--languages', type=str, nargs='+', help='The languages used by the project', default=['C', 'CXX'])
+    parser.add_argument('--cpp-version', type=int, help='The cpp version to use', default=20)
+    parser.add_argument('--c-version', type=int, help='The c version to use', default=98)
+    parser.add_argument('--use-conan', default=False, action='store_true', help='Using conan package manager')
+    parser.add_argument('--create-class', nargs='+',  type=str, help='Create a cpp and hpp file with boilerplate filled out')
 
     args = parser.parse_args()
 
@@ -250,7 +246,11 @@ if __name__ == '__main__':
     read_config()
 
     if args.create_project:
-        generate_project(args.create_project, use_conan=args.use_conan)
-
+        generate_project(args.create_project, 
+            use_conan=args.use_conan,
+            languages=args.languages,
+            cpp_version=args.cpp_version,
+            c_version=args.c_version)
     if args.create_class:
-        create_cpp_class(args.create_class)
+        for name in args.create_class:
+            create_cpp_class(name)
