@@ -68,14 +68,27 @@ static size_t tests_run = 0;
 static size_t tests_passed = 0;
 
 struct test_failed : std::exception {
+    std::string message;
+    test_failed(std::string&& text){ 
+        message = std::move(text);
+    }
+
     const char* what() const noexcept override {
-        return "Assert Failed";
+        return message.c_str();
     }
 };
 
-constexpr auto throw_assert(bool b) -> auto {
-    if (!b) throw test_failed();
+constexpr auto throw_assert(const bool b, std::string&& text) -> auto {
+    if (!b) throw test_failed(std::move(text));
 }
+
+constexpr auto throw_assert(const bool b) -> auto {
+    throw_assert(b, "Assert Failed"s);
+}
+
+
+#define TEST_ASSERT( x ) throw_assert(x, "TEST FAILED: " #x);
+
 
 template <typename Fn>
 auto run_test(const char* name, const Fn& test) -> auto {
@@ -91,11 +104,11 @@ auto run_test(const char* name, const Fn& test) -> auto {
 
 int main(int argc, char** argv) {
     run_test("equal", [](){
-        throw_assert(1 == 1);
+        TEST_ASSERT(1 == 1);
     });
 
     run_test("fail_test", [](){
-        throw_assert(0 == 1);
+        TEST_ASSERT(0 == 1);
     });
 
     std::cout << tests_passed << " / " << tests_run << " Tests Succeeded!" << std::endl;
