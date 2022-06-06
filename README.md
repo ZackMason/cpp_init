@@ -175,8 +175,8 @@ include_directories(include)
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
+%CMAKE_TESTS%
 %CONAN_LINK%
-
 ```
 
 ---
