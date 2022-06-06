@@ -1,10 +1,12 @@
 # cpp_init
 A python script for creating c/cpp projects that use cmake, with options for adding conan libraries and code templates
 
-you can expand much of the functionallity creating templates in ```~/.cpp_init/templates``` and setting the path in ```~/.cpp_init/config.yaml``` (more info below)
+you can expand much of the functionality by creating templates in ```~/.cpp_init/templates``` and setting the path in ```~/.cpp_init/config.yaml``` (more info below)
 
 right now there are only options for creating executable projects
 I plan on adding static libs and dynamic libs later
+
+The default unit testing template for cpp requires cpp 17, if you are using an earlier version you need to write your own template
 
 ## setup
 
@@ -37,16 +39,22 @@ cpp_init.py
 
 this will create ```~/.cpp_init/``` which holds the config file and a directory where you can store your templates
 
-config example
+config example (this will be expanded to have multiple profiles soon)
 
 ```
 hpp_template: hpp_template.txt
 cpp_template: cpp_template.txt
+cpp_version_template: default
+c_version_template:   default
+cmake_template: default
+cmake_tests_template: default
 prologue: prologue.txt
 epilogue: none
 types_hpp_template: default
 core_hpp_template: default
-main_cpp_template: default
+tests_cpp_template: fmt_tests.cpp
+tests_c_template: default
+main_cpp_template: main_cpp_template.txt
 main_c_template: default
 cmake_version: default
 ```
@@ -54,21 +62,42 @@ cmake_version: default
 notice the use of ```none``` in ```epilogue``` which will use an empty string in its place, this is different than default which
 will use my default templates.
 
-## Flags
-+ -h, --help
-+ --create-project %PROJECT_NAME%
-+ --create-class [filepath/class_name]
-+ --create-code [filepath/code_name]
-+ --use-conan
-+ --languages "CXX" | "C" | "CXX C"
-+ --cpp-version %i
-+ --c-version %i
+## Usage
+```
+usage: cpp_init.py [-h] [--create-project CREATE_PROJECT] [--languages LANGUAGES [LANGUAGES ...]] [--cpp-version CPP_VERSION]
+                   [--c-version C_VERSION] [--use-conan] [--unit-testing] [--no-vscode] [--create-class CREATE_CLASS [CREATE_CLASS ...]]    
+                   [--create-code CREATE_CODE [CREATE_CODE ...]] [--create-header CREATE_HEADER [CREATE_HEADER ...]]
+                   [--create-source CREATE_SOURCE [CREATE_SOURCE ...]]
+
+options:
+  -h, --help            show this help message and exit
+  --create-project CREATE_PROJECT
+                        Create a cpp project in the current directory
+  --languages LANGUAGES [LANGUAGES ...]
+                        The languages used by the project
+  --cpp-version CPP_VERSION
+                        The cpp version to use
+  --c-version C_VERSION
+                        The c version to use
+  --use-conan           Using conan package manager
+  --unit-testing        Creates a seperate executable for unit testing
+  --no-vscode           Turns off the generator for .vscode/settings.json
+  --create-class CREATE_CLASS [CREATE_CLASS ...]
+                        Create a cpp and hpp file with boilerplate filled out, expects that you are in the root of your project
+  --create-code CREATE_CODE [CREATE_CODE ...]
+                        Create a c and h file with boilerplate filled out, expects that you are in the root of your project
+  --create-header CREATE_HEADER [CREATE_HEADER ...]
+                        Create an h file with boilerplate filled out, expects that you are in the root of your project
+  --create-source CREATE_SOURCE [CREATE_SOURCE ...]
+                        Create a c file with boilerplate filled out, expects that you are in the root of your project
+```
+
 
 ## Creating and Building your project
 
 run 
 ```
-cpp_init.py --create-project example --use-conan --languages CXX
+cpp_init.py --create-project example --use-conan --languages CXX C --cpp-version 20 --unit-testing 
 ```
 if you don't want to use conan you can omit the ```--use-conan``` flag
 
@@ -118,6 +147,9 @@ struct %CLASS_NAME%_t {
 
 };
 ```
+
+```%CODE_NAME%``` and ```%CLASS_NAME%``` are actually equivalent 
+
 ---
 
 prologue
@@ -149,8 +181,8 @@ include_directories(include)
 add_executable(${PROJECT_NAME} ${src_files})
 target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
+%CMAKE_TESTS%
 %CONAN_LINK%
-
 ```
 
 ---
@@ -159,6 +191,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CUR
 + add vcpkg support
 + multiple profiles in config.yaml
 + emscripten support
++ user defined project layout
 
 
 
