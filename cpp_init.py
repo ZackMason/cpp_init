@@ -255,6 +255,8 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version,
             f.write(CONAN_TEMPLATE)
 
     print(f'Creating CMakeLists.txt')
+
+    # TODO: use regex?? idk if that would actually be clearer
     with open(f'{project_directory_path}/CMakeLists.txt', 'x') as f:
         template = config['cmake_template']
         template = template.replace('%CMAKE_VERSION%', config['cmake_version'])
@@ -315,6 +317,7 @@ def create_cpp_class(class_name, header_ext, source_ext):
 
     todays_date = date.today()
 
+    # TODO: use regex?? idk if that would actually be clearer
     def create_template(name, prologue = '',epilogue = ''):
         contents = config[name].replace('%CLASS_NAME%', class_name)
         sub_dir = class_sub_dir + '/' if class_sub_dir else ''
