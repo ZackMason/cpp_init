@@ -54,15 +54,35 @@ cmake_version: default
 notice the use of ```none``` in ```epilogue``` which will use an empty string in its place, this is different than default which
 will use my default templates.
 
-## Flags
-+ -h, --help
-+ --create-project %PROJECT_NAME%
-+ --create-class [filepath/class_name]
-+ --create-code [filepath/code_name]
-+ --use-conan
-+ --languages "CXX" | "C" | "CXX C"
-+ --cpp-version %i
-+ --c-version %i
+## Usage
+```
+usage: cpp_init.py [-h] [--create-project CREATE_PROJECT] [--languages LANGUAGES [LANGUAGES ...]] [--cpp-version CPP_VERSION]
+                   [--c-version C_VERSION] [--use-conan] [--unit-testing] [--no-vscode] [--create-class CREATE_CLASS [CREATE_CLASS ...]]    
+                   [--create-code CREATE_CODE [CREATE_CODE ...]] [--create-header CREATE_HEADER [CREATE_HEADER ...]]
+                   [--create-source CREATE_SOURCE [CREATE_SOURCE ...]]
+
+options:
+  -h, --help            show this help message and exit
+  --create-project CREATE_PROJECT
+                        Create a cpp project in the current directory
+  --languages LANGUAGES [LANGUAGES ...]
+                        The languages used by the project
+  --cpp-version CPP_VERSION
+                        The cpp version to use
+  --c-version C_VERSION
+                        The c version to use
+  --use-conan           Using conan package manager
+  --unit-testing        Creates a seperate executable for unit testing
+  --no-vscode           Turns off the generator for .vscode/settings.json
+  --create-class CREATE_CLASS [CREATE_CLASS ...]
+                        Create a cpp and hpp file with boilerplate filled out, expects that you are in the root of your project
+  --create-code CREATE_CODE [CREATE_CODE ...]
+                        Create a c and h file with boilerplate filled out, expects that you are in the root of your project
+  --create-header CREATE_HEADER [CREATE_HEADER ...]
+                        Create an h file with boilerplate filled out, expects that you are in the root of your project
+  --create-source CREATE_SOURCE [CREATE_SOURCE ...]
+                        Create a c file with boilerplate filled out, expects that you are in the root of your project
+```
 
 ## Creating and Building your project
 
