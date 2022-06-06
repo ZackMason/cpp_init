@@ -144,6 +144,9 @@ struct %CLASS_NAME%_t {
 
 };
 ```
+
+```%CODE_NAME%``` and ```%CLASS_NAME%``` are actually equivalent 
+
 ---
 
 prologue
