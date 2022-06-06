@@ -160,6 +160,16 @@ struct %CLASS_NAME%_t {
 
 ```%CODE_NAME%``` and ```%CLASS_NAME%``` are actually equivalent 
 
+the command ```cpp_init.py --create-class Graphics/window``` using the above template will produce 
+
+```
+#pragma once
+
+struct window_t {
+
+};
+```
+
 ---
 
 prologue
