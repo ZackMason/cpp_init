@@ -243,7 +243,7 @@ config = {
     'cmake_version': '2.8.12'
 }
 
-def generate_project(project_name, use_conan, languages, cpp_version, c_version, use_vscode):
+def generate_project(project_name, use_conan, languages, cpp_version, c_version, use_vscode, with_tests):
     project_directory_path = os.getcwd() + '/' + project_name
     print(f'Creating directory: {project_directory_path}')
     os.mkdir(project_directory_path)
@@ -261,7 +261,10 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version,
         template = template.replace('%LANGUAGES%', ' '.join(languages))
         template = template.replace('%CONAN_SETUP%', CONAN_SETUP_TEMPLATE if use_conan else '')
         template = template.replace('%CONAN_LINK%', CONAN_LINK_TEMPLATE if use_conan else '')
-        template = template.replace('%CMAKE_TESTS%', config['cmake_tests_template'] % (CONAN_LINK_TESTS_TEMPLATE if use_conan else ''))
+        if with_tests:
+            template = template.replace('%CMAKE_TESTS%', config['cmake_tests_template'] % (CONAN_LINK_TESTS_TEMPLATE if use_conan else ''))
+        else:
+            template = template.replace('%CMAKE_TESTS%', '')
         template = template.replace('%CPP_VERSION%', (config['cpp_version_template'] % cpp_version) if 'CXX' in languages else '')
         template = template.replace('%C_VERSION%', (config['c_version_template'] % c_version) if 'C' in languages else '')
         f.write(template)
@@ -269,12 +272,13 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version,
     os.mkdir(f'{project_directory_path}/src')
     os.mkdir(f'{project_directory_path}/include')
     os.mkdir(f'{project_directory_path}/assets')
-    os.mkdir(f'{project_directory_path}/tests')
     os.mkdir(f'{project_directory_path}/build')
     if use_vscode:
         os.mkdir(f'{project_directory_path}/.vscode')
         with open(f'{project_directory_path}/.vscode/settings.json', 'x') as f:
             f.write(VSCODE_SETTINGS_JSON_TEMPLATE)
+    if with_tests:
+        os.mkdir(f'{project_directory_path}/tests')
 
     if 'CXX' in languages:
         with open(f'{project_directory_path}/src/main.cpp', 'x') as f:
@@ -286,13 +290,15 @@ def generate_project(project_name, use_conan, languages, cpp_version, c_version,
         if config['types_hpp_template']:
             with open(f'{project_directory_path}/include/types.hpp', 'x') as f:
                 f.write(config['types_hpp_template'])
-        with open(f'{project_directory_path}/tests/tests.cpp', 'x') as f:
-            f.write(config['tests_cpp_template'])
+        if with_tests:
+            with open(f'{project_directory_path}/tests/tests.cpp', 'x') as f:
+                f.write(config['tests_cpp_template'])
     else:
         with open(f'{project_directory_path}/src/main.c', 'x') as f:
             f.write(config['main_c_template'])
-        with open(f'{project_directory_path}/tests/tests.c', 'x') as f:
-            f.write(config['tests_c_template'])
+        if with_tests:
+            with open(f'{project_directory_path}/tests/tests.c', 'x') as f:
+                f.write(config['tests_c_template'])
 
 def create_cpp_class(class_name, header_ext, source_ext):
     project_directory_path = os.getcwd()
@@ -402,6 +408,7 @@ if __name__ == '__main__':
     parser.add_argument('--cpp-version', type=int, help='The cpp version to use', default=11)
     parser.add_argument('--c-version', type=int, help='The c version to use', default=11)
     parser.add_argument('--use-conan', default=False, action='store_true', help='Using conan package manager')
+    parser.add_argument('--unit-testing', default=False, action='store_true', help='Creates a seperate executable for unit testing')
     parser.add_argument('--no-vscode', default=False, action='store_true', help='Turns off the generator for .vscode/settings.json')
     parser.add_argument('--create-class', nargs='+',  type=str, help='Create a cpp and hpp file with boilerplate filled out, expects that you are in the root of your project')
     parser.add_argument('--create-code', nargs='+',  type=str, help='Create a c and h file with boilerplate filled out, expects that you are in the root of your project')
@@ -419,7 +426,8 @@ if __name__ == '__main__':
             languages=args.languages,
             cpp_version=args.cpp_version,
             c_version=args.c_version,
-            use_vscode=not args.no_vscode)
+            use_vscode=not args.no_vscode, 
+            with_tests=args.unit_testing)
     if args.create_code:
         for name in args.create_code:
             create_cpp_class(name, 'h', 'c')
