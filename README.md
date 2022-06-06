@@ -6,7 +6,7 @@ you can expand much of the functionality by creating templates in ```~/.cpp_init
 right now there are only options for creating executable projects
 I plan on adding static libs and dynamic libs later
 
-The default unit testing template for cpp requires cpp 17, if you are using an earlier version you need to write your own template
+The default unit testing template for cpp requires cpp 20, if you are using an earlier version you need to write your own template
 
 ## setup
 
