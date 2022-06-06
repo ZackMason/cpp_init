@@ -94,7 +94,7 @@ options:
 
 run 
 ```
-cpp_init.py --create-project example --use-conan --languages CXX
+cpp_init.py --create-project example --use-conan --languages CXX C --cpp-version 20 --unit-testing 
 ```
 if you don't want to use conan you can omit the ```--use-conan``` flag
 
