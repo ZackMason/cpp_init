@@ -185,6 +185,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CUR
 + add vcpkg support
 + multiple profiles in config.yaml
 + emscripten support
++ user defined project layout
 
 
 
