@@ -105,8 +105,13 @@ if there are dependancies that you need to use then add them to ```conanfile.txt
 ```
 cd example/build
 conan install .. -s build_type %TYPE% // conan should give you instructions if something goes wrong here, most likely you need to --build
-cmake .. or cmake .. -G %GENERATOR% -DCMAKE_BUILD_TYPE=%TYPE%
+cmake ..
 cmake --build . --config %TYPE% (for msvc specify build type, not needed on others I think??)
+```
+
+```cmake ..``` could also be replaced with
+```
+cmake .. -G %GENERATOR% -DCMAKE_BUILD_TYPE=%TYPE%
 ```
 
 
