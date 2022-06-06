@@ -187,7 +187,8 @@ CMAKE_TESTS_TEMPLATE = '''file(GLOB_RECURSE test_files
     ${PROJECT_SOURCE_DIR}/src/*.c*
     ${PROJECT_SOURCE_DIR}/tests/*.c*
 )
-list(FILTER test_files EXCLUDE REGEX ${PROJECT_SOURCE_DIR}/src/main.c*)
+list(REMOVE_ITEM test_files ${PROJECT_SOURCE_DIR}/src/main.c)
+list(REMOVE_ITEM test_files ${PROJECT_SOURCE_DIR}/src/main.cpp)
 
 add_executable(tests ${test_files})
 target_compile_definitions(tests PUBLIC CMAKE_ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
