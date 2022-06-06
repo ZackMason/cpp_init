@@ -37,7 +37,7 @@ cpp_init.py
 
 this will create ```~/.cpp_init/``` which holds the config file and a directory where you can store your templates
 
-config example
+config example (this will be expanded to have multiple profiles soon)
 
 ```
 hpp_template: hpp_template.txt
