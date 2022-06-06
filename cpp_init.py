@@ -388,22 +388,8 @@ def read_config():
     assert os.path.isdir(home_dir)
     with open(f'{home_dir}/config.yaml', 'r') as f:
         yaml_config = yaml.load(f, Loader=yaml.FullLoader)
-        load_template('hpp_template')
-        load_template('cpp_template')
-        load_template('cpp_version_template')
-        load_template('c_version_template')
-        load_template('cmake_template')
-        load_template('cmake_tests_template')
-        load_template('prologue')
-        load_template('epilogue')
-        load_template('types_hpp_template')
-        load_template('core_hpp_template')
-        load_template('types_hpp_template')
-        load_template('main_cpp_template')
-        load_template('tests_cpp_template')
-        load_template('tests_c_template')
-        load_template('main_c_template')
-        load_template('cmake_version')
+        for key in config.keys():
+            load_template(key)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
