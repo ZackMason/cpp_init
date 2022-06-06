@@ -171,6 +171,21 @@ struct window_t {
 ```
 
 ---
+template header
+```
+#pragma once
+
+template<typename T>
+struct %CLASS_NAME%_t {
+  T& get() const;
+  T value;
+};
+
+#include "%SOURCE_PATH%"
+
+```
+
+---
 
 prologue
 ```
