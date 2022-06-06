@@ -6,6 +6,8 @@ you can expand much of the functionality by creating templates in ```~/.cpp_init
 right now there are only options for creating executable projects
 I plan on adding static libs and dynamic libs later
 
+The default unit testing template for cpp requires cpp 17, if you are using an earlier version you need to write your own template
+
 ## setup
 
 if you don't have ```pyyaml``` installed then run
@@ -89,6 +91,7 @@ options:
   --create-source CREATE_SOURCE [CREATE_SOURCE ...]
                         Create a c file with boilerplate filled out, expects that you are in the root of your project
 ```
+
 
 ## Creating and Building your project
 
