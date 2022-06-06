@@ -42,11 +42,17 @@ config example
 ```
 hpp_template: hpp_template.txt
 cpp_template: cpp_template.txt
+cpp_version_template: default
+c_version_template:   default
+cmake_template: default
+cmake_tests_template: default
 prologue: prologue.txt
 epilogue: none
 types_hpp_template: default
 core_hpp_template: default
-main_cpp_template: default
+tests_cpp_template: fmt_tests.cpp
+tests_c_template: default
+main_cpp_template: main_cpp_template.txt
 main_c_template: default
 cmake_version: default
 ```
