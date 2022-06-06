@@ -1,7 +1,7 @@
 # cpp_init
 A python script for creating c/cpp projects that use cmake, with options for adding conan libraries and code templates
 
-you can expand much of the functionallity creating templates in ```~/.cpp_init/templates``` and setting the path in ```~/.cpp_init/config.yaml``` (more info below)
+you can expand much of the functionality by creating templates in ```~/.cpp_init/templates``` and setting the path in ```~/.cpp_init/config.yaml``` (more info below)
 
 right now there are only options for creating executable projects
 I plan on adding static libs and dynamic libs later
